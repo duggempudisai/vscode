@@ -1321,7 +1321,7 @@ class ContextKeyAndExpr implements IContextKeyExpression {
 	}
 
 	public serialize(): string {
-		return this.expr.map(e => e.serialize()).join(' && ');
+		return `(${this.expr.map(e => e.serialize()).join(' && ')})`;
 	}
 
 	public keys(): string[] {
@@ -1491,7 +1491,7 @@ class ContextKeyOrExpr implements IContextKeyExpression {
 	}
 
 	public serialize(): string {
-		return this.expr.map(e => e.serialize()).join(' || ');
+		return `(${this.expr.map(e => e.serialize()).join(' || ')})`;
 	}
 
 	public keys(): string[] {

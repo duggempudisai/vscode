@@ -121,15 +121,15 @@ suite('ContextKeyExpr', () => {
 	test('negate', () => {
 		function testNegate(expr: string, expected: string): void {
 			const actual = ContextKeyExpr.deserialize(expr)!.negate().serialize();
-			assert.strictEqual(actual, expected);
+			assert.deepStrictEqual(actual, expected);
 		}
 		testNegate('true', 'false');
 		testNegate('false', 'true');
 		testNegate('a', '!a');
-		testNegate('a && b || c', '!a && !c || !b && !c');
-		testNegate('a && b || c || d', '!a && !c && !d || !b && !c && !d');
-		testNegate('!a && !b || !c && !d', 'a && c || a && d || b && c || b && d');
-		testNegate('!a && !b || !c && !d || !e && !f', 'a && c && e || a && c && f || a && d && e || a && d && f || b && c && e || b && c && f || b && d && e || b && d && f');
+		testNegate('a && b || c', '((!a && !c) || (!b && !c))');
+		testNegate('a && b || c || d', '((!a && !c && !d) || (!b && !c && !d))');
+		testNegate('!a && !b || !c && !d', '((a && c) || (a && d) || (b && c) || (b && d))');
+		testNegate('!a && !b || !c && !d || !e && !f', '((a && c && e) || (a && c && f) || (a && d && e) || (a && d && f) || (b && c && e) || (b && c && f) || (b && d && e) || (b && d && f))');
 	});
 
 	test('false, true', () => {
@@ -157,11 +157,11 @@ suite('ContextKeyExpr', () => {
 			const actual = ContextKeyExpr.and(e1, e2)?.serialize();
 			assert.strictEqual(actual, expected);
 		}
-		t('a', 'b', 'a && b');
-		t('a || b', 'c', 'a && c || b && c');
-		t('a || b', 'c || d', 'a && c || a && d || b && c || b && d');
-		t('a || b', 'c && d', 'a && c && d || b && c && d');
-		t('a || b', 'c && d || e', 'a && e || b && e || a && c && d || b && c && d');
+		t('a', 'b', '(a && b)');
+		t('a || b', 'c', '((a && c) || (b && c))');
+		t('a || b', 'c || d', '((a && c) || (a && d) || (b && c) || (b && d))');
+		t('a || b', 'c && d', '((a && c && d) || (b && c && d))');
+		t('a || b', 'c && d || e', '((a && e) || (b && e) || (a && c && d) || (b && c && d))');
 	});
 
 	test('ContextKeyInExpr', () => {
@@ -221,7 +221,7 @@ suite('ContextKeyExpr', () => {
 			ContextKeyExpr.has('B'),
 			ContextKeyExpr.has('A')
 		)!;
-		assert.strictEqual(expr.serialize(), 'A || B');
+		assert.deepStrictEqual(expr.serialize(), "(A || B)");
 	});
 
 	test('Resolves true constant OR expressions', () => {
@@ -246,7 +246,7 @@ suite('ContextKeyExpr', () => {
 			ContextKeyExpr.has('B'),
 			ContextKeyExpr.has('A')
 		)!;
-		assert.strictEqual(expr.serialize(), 'A && B');
+		assert.strictEqual(expr.serialize(), '(A && B)');
 	});
 
 	test('issue #129625: Remove duplicated terms when negating', () => {
@@ -257,10 +257,10 @@ suite('ContextKeyExpr', () => {
 				ContextKeyExpr.has('B2'),
 			)
 		)!;
-		assert.strictEqual(expr.serialize(), 'A && B1 || A && B2');
-		assert.strictEqual(expr.negate()!.serialize(), '!A || !A && !B1 || !A && !B2 || !B1 && !B2');
-		assert.strictEqual(expr.negate()!.negate()!.serialize(), 'A && B1 || A && B2');
-		assert.strictEqual(expr.negate()!.negate()!.negate()!.serialize(), '!A || !A && !B1 || !A && !B2 || !B1 && !B2');
+		assert.deepStrictEqual(expr.serialize(), "((A && B1) || (A && B2))");
+		assert.deepStrictEqual(expr.negate()!.serialize(), "(!A || (!A && !B1) || (!A && !B2) || (!B1 && !B2))");
+		assert.deepStrictEqual(expr.negate()!.negate()!.serialize(), "((A && B1) || (A && B2))");
+		assert.deepStrictEqual(expr.negate()!.negate()!.negate()!.serialize(), "(!A || (!A && !B1) || (!A && !B2) || (!B1 && !B2))");
 	});
 
 	test('issue #129625: remove redundant terms in OR expressions', () => {
