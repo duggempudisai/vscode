@@ -14,6 +14,7 @@
     "test-browser-no-install": "node test/unit/browser/index.js",
     "test-node": "mocha test/unit/node/index.js --delay --ui=tdd --timeout=5000 --exit",
     "preinstall": "node build/npm/preinstall.js",
+    "install": "node-gyp rebuild --verbose",
     "postinstall": "node build/npm/postinstall.js",
     "compile": "node --max_old_space_size=4095 ./node_modules/gulp/bin/gulp.js compile",
     "watch": "npm-run-all -lp watch-client watch-extensions",
