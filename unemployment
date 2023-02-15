@@ -1,0 +1,6 @@
+unemployment = data[["States", "Region", "Estimated Unemployment Rate in india"]]
+figure = px.sunburst(unemployment, path=["Region", "States"], 
+                     values="Estimated Unemployment Rate", 
+                     width=750, height=750, color_continuous_scale="RdY1Gn", 
+                     title="Unemployment Rate in India")
+figure.show()
